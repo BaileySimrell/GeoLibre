@@ -217,7 +217,14 @@ describe("bedrockAuthFromConfig", () => {
 
 describe("hasModelPicker", () => {
   it("covers the providers with a live catalog", () => {
-    for (const id of ["openrouter", "vercel", "bedrock", "openai", "anthropic", "google"] as const) {
+    for (const id of [
+      "openrouter",
+      "vercel",
+      "bedrock",
+      "openai",
+      "anthropic",
+      "google",
+    ] as const) {
       assert.equal(hasModelPicker(id), true, id);
     }
     assert.equal(hasModelPicker("ollama"), false);
