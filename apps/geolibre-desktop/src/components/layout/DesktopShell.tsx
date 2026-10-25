@@ -30,6 +30,7 @@ import { AddCommentDialog } from "../comments/AddCommentDialog";
 import { openRightPanel } from "@geolibre/plugins";
 import { getIsMobileViewport } from "../../hooks/useIsMobileViewport";
 import { useProjectFileActions } from "../../hooks/useProjectFileActions";
+import { useLiveMapUrl } from "../../hooks/useLiveMapUrl";
 import { useProjectHistory } from "../../hooks/useProjectHistory";
 import { useScreenshotReadiness } from "../../hooks/useScreenshotReadiness";
 import i18n from "../../i18n";
@@ -389,6 +390,7 @@ export function DesktopShell({
     editFeatureGeometry: handleEditFeatureGeometry,
     viewer: layoutOptions.viewer,
   });
+  useLiveMapUrl();
   useTileProtocols();
   useRasterFileHandlers(mapControllerRef, t);
   // Fetching the registry also tells the credential redaction which external
