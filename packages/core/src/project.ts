@@ -1853,6 +1853,12 @@ function withoutZarrHeaders(layer: GeoLibreLayer): GeoLibreLayer {
   return { ...layer, source };
 }
 
+function withoutRuntimeGeoArrow(layer: GeoLibreLayer): GeoLibreLayer {
+  if (layer.geoarrow === undefined) return layer;
+  const { geoarrow: _geoarrow, ...rest } = layer;
+  return rest;
+}
+
 /**
  * Strip the session-only state every serializer must leave out, whether or not
  * the project came through `projectFromStore`.
@@ -1861,7 +1867,7 @@ function withoutZarrHeaders(layer: GeoLibreLayer): GeoLibreLayer {
  * @returns The layer as it may be written to a project file.
  */
 function portableLayer(layer: GeoLibreLayer): GeoLibreLayer {
-  return withoutZarrHeaders(withoutLocalRasterBytes(layer));
+  return withoutRuntimeGeoArrow(withoutZarrHeaders(withoutLocalRasterBytes(layer)));
 }
 
 function normalizeLayer(layer: GeoLibreLayer): GeoLibreLayer {
@@ -1874,6 +1880,7 @@ function normalizeLayer(layer: GeoLibreLayer): GeoLibreLayer {
     capabilities: rawCapabilities,
     filterExpression: rawFilterExpression,
     descriptiveMetadata: rawDescriptiveMetadata,
+    geoarrow: _rawGeoarrow,
     ...rest
   } = layer;
   const capabilities = normalizeLayerCapabilities(rawCapabilities);
@@ -1886,6 +1893,8 @@ function normalizeLayer(layer: GeoLibreLayer): GeoLibreLayer {
     validateMapExpression(JSON.stringify(rawFilterExpression), { expectedType: "boolean" }).ok
       ? rawFilterExpression
       : undefined;
+  // Batches are runtime caches. A hydrated batch cannot be verified against
+  // the saved GeoJSON, so always discard it to avoid rendering stale data.
   return {
     ...rest,
     style: { ...DEFAULT_LAYER_STYLE, ...layer.style },
