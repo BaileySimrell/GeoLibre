@@ -237,7 +237,7 @@ export class PanelUI extends EventTarget {
     this.eventSelect.id = "vantor-event-select";
     const loadingOption = document.createElement("option");
     loadingOption.value = "";
-    this.localizeText(loadingOption, "vantor.loadingEvents", "Loading events...");
+    this.localizeText(loadingOption, "vantor.loadingEvents", "Loading events…");
     this.eventSelect.appendChild(loadingOption);
     eventRow.appendChild(this.eventSelect);
 
@@ -789,7 +789,7 @@ export class PanelUI extends EventTarget {
 
   private updateSearchButtonLabel(): void {
     this.searchBtn.textContent = this.loading
-      ? this.t("vantor.searching", "Searching...")
+      ? this.t("vantor.searching", "Searching…")
       : this.t("vantor.search", "Search");
   }
 
