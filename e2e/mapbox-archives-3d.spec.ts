@@ -164,7 +164,7 @@ for (const theme of ["light", "dark"] as const) {
     const choosing = page.waitForEvent("filechooser");
     await page.getByRole("button", { name: "Project", exact: true }).click();
     await page.getByRole("menuitem", { name: "Open From" }).click();
-    await page.getByRole("menuitem", { name: "File...", exact: true }).click();
+    await page.getByRole("menuitem", { name: "File…", exact: true }).click();
     await (
       await choosing
     ).setFiles({

@@ -789,7 +789,7 @@ export class PanelUI extends EventTarget {
 
   private updateSearchButtonLabel(): void {
     this.searchBtn.textContent = this.loading
-      ? this.t("vantor.searching", "Searching...")
+      ? this.t("vantor.searching", "Searching…")
       : this.t("vantor.search", "Search");
   }
 

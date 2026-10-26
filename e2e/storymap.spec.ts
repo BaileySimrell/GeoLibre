@@ -16,7 +16,7 @@ async function waitForMap(page: Page, path = "/"): Promise<void> {
 /** Opens Project → Story Map and returns the dialog locator. */
 async function openStoryMapPanel(page: Page) {
   await page.getByRole("button", { name: "Project" }).click();
-  await page.getByRole("menuitem", { name: "Story Map..." }).click();
+  await page.getByRole("menuitem", { name: "Story Map…" }).click();
   const dialog = page.getByRole("dialog");
   await expect(dialog.getByRole("heading", { name: "Story Map" })).toBeVisible();
   return dialog;
@@ -80,7 +80,7 @@ test("persists a story map across save and reopen", async ({ page }) => {
   const chooserPromise = page.waitForEvent("filechooser");
   await page.getByRole("button", { name: "Project" }).click();
   await page.getByRole("menuitem", { name: "Open From" }).click();
-  await page.getByRole("menuitem", { name: "File..." }).click();
+  await page.getByRole("menuitem", { name: "File…" }).click();
   const chooser = await chooserPromise;
   await chooser.setFiles(savedPath);
 

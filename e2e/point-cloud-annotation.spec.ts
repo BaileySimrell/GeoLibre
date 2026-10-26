@@ -298,7 +298,7 @@ test.describe("point cloud annotation", () => {
     const chooserPromise = page.waitForEvent("filechooser");
     await page.getByRole("button", { name: "Project" }).click();
     await page.getByRole("menuitem", { name: "Open From" }).click();
-    await page.getByRole("menuitem", { name: "File..." }).click();
+    await page.getByRole("menuitem", { name: "File…" }).click();
     await (await chooserPromise).setFiles(projectPath);
     await expect(
       page.locator('[data-testid="layer-row"][data-layer-name="1.2-with-color.copc.laz"]'),
@@ -402,7 +402,7 @@ test.describe("point cloud annotation", () => {
     const chooserPromise = page.waitForEvent("filechooser");
     await page.getByRole("button", { name: "Project" }).click();
     await page.getByRole("menuitem", { name: "Open From" }).click();
-    await page.getByRole("menuitem", { name: "File..." }).click();
+    await page.getByRole("menuitem", { name: "File…" }).click();
     await (await chooserPromise).setFiles(projectPath);
     await startSession(page, { restored: true });
     await expect(page.getByTestId("pc-annotation-cuboids").locator('[data-box="1"]')).toContainText(

@@ -167,7 +167,7 @@ test("Project dialogs: New Project, History, Print Layout", async ({ page }, tes
   );
   await waitForMap(page);
 
-  await openMenuItem(page, "Project", "New...");
+  await openMenuItem(page, "Project", "New…");
   const newProject = page.getByRole("dialog", { name: "New project" });
   await expect(newProject).toBeVisible();
   // The Examples section (#2884) starts collapsed; scan it open.
@@ -177,12 +177,12 @@ test("Project dialogs: New Project, History, Print Layout", async ({ page }, tes
   await expectAccessible(page, "new-project", testInfo);
   await closeDialog(page, "New project");
 
-  await openMenuItem(page, "Project", "History...");
+  await openMenuItem(page, "Project", "History…");
   await expect(page.getByRole("dialog", { name: "Project History" })).toBeVisible();
   await expectAccessible(page, "project-history", testInfo);
   await closeDialog(page, "Project History");
 
-  await openMenuItem(page, "Project", "Print Layout...");
+  await openMenuItem(page, "Project", "Print Layout…");
   await expect(page.getByRole("dialog", { name: "Print Layout" })).toBeVisible();
   await expectAccessible(page, "print-layout", testInfo);
 });

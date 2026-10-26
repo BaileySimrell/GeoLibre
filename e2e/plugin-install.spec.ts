@@ -160,7 +160,7 @@ test("deployment defaultActive applies to fresh projects but respects explicit d
   const root = page.locator("html");
   const previousGeneration = await root.getAttribute("data-geolibre-project-generation");
   await page.getByRole("button", { name: "Project", exact: true }).click();
-  await page.getByRole("menuitem", { name: "New...", exact: true }).click();
+  await page.getByRole("menuitem", { name: "New…", exact: true }).click();
   const newProjectDialog = page.getByRole("dialog", { name: "New project" });
   const discardButton = page.getByRole("button", { name: "Do not save", exact: true });
   // The unsaved-changes prompt (when it shows) opens a beat after the menu
