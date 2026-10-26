@@ -146,7 +146,20 @@ test("moves across the top menus with the arrow keys (#3232)", async ({ page }) 
   await expect(page.getByRole("menu", { name: "Edit" })).toBeVisible();
   await expect(page.getByRole("menu", { name: "Project" })).toHaveCount(0);
   await page.keyboard.press("ArrowRight");
-  await expect(page.getByRole("menu", { name: "View" })).toBeVisible();
+  const viewMenu = page.getByRole("menu", { name: "View", exact: true });
+  await expect(viewMenu).toBeVisible();
+
+  // On a submenu trigger, Right/Left open and close the submenu instead of
+  // switching top-level menus.
+  const splitView = viewMenu.getByRole("menuitem", { name: "Split View" });
+  await splitView.focus();
+  await page.keyboard.press("ArrowRight");
+  await expect(page.getByRole("menu", { name: "Split View" })).toBeVisible();
+  await expect(viewMenu).toBeVisible();
+  await page.keyboard.press("ArrowLeft");
+  await expect(page.getByRole("menu", { name: "Split View" })).toHaveCount(0);
+  await expect(viewMenu).toBeVisible();
+  await expect(splitView).toBeFocused();
 
   await page.keyboard.press("Escape");
   await expect(view).toBeFocused();

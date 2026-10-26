@@ -9,7 +9,10 @@ function toolbarTriggers(toolbar: HTMLElement): HTMLElement[] {
   return Array.from(toolbar.querySelectorAll<HTMLElement>(TRIGGER_SELECTOR)).filter(
     // Skip triggers nested in menu content and any that are hidden or disabled.
     (el) =>
-      !el.closest('[role="menu"]') && el.offsetParent !== null && !el.hasAttribute("disabled"),
+      !el.closest('[role="menu"]') &&
+      el.offsetParent !== null &&
+      !el.hasAttribute("disabled") &&
+      el.getAttribute("aria-disabled") !== "true",
   );
 }
 
@@ -54,11 +57,25 @@ export function useMenubarKeyboard() {
       if (index === -1) return;
       event.preventDefault();
       const step = key === nextKey ? 1 : -1;
+      const current = triggers[index];
       const next = triggers[(index + step + triggers.length) % triggers.length];
-      // Escape closes the current menu; open the next one once its focus
-      // restore has run so it doesn't pull focus back to the old trigger.
+      // Escape closes the current menu, and Radix then hands focus back to its
+      // trigger (DropdownMenu's close auto-focus, run from a timer after the
+      // content unmounts). Open the next menu only once that restore has
+      // landed, so it cannot pull focus back to the old trigger. The fallback
+      // timer covers a close that restores nothing.
+      let opened = false;
+      const open = () => {
+        if (opened) return;
+        opened = true;
+        current.removeEventListener("focus", onRestore);
+        window.clearTimeout(fallback);
+        openMenuFrom(next);
+      };
+      const onRestore = () => window.setTimeout(open, 0);
+      current.addEventListener("focus", onRestore, { once: true });
+      const fallback = window.setTimeout(open, 100);
       document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
-      window.setTimeout(() => openMenuFrom(next), 0);
       return;
     }
 
