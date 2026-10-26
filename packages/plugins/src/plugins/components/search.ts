@@ -13,7 +13,7 @@ const SEARCH_OPTIONS = {
   collapsed: false,
   fontColor: "hsl(var(--popover-foreground))",
   maxResults: 8,
-  placeholder: "Search places...",
+  placeholder: "Search places…",
   width: 320,
 } satisfies SearchControlOptions;
 

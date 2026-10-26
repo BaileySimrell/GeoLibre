@@ -24,6 +24,13 @@ function sourceFiles(dir: string): string[] {
   });
 }
 
+// A `t("some.key", "Fallback...")` pair: the fallback shows whenever the
+// catalog is not loaded, so it must match the en.json value's ellipsis. The
+// fallback runs to its own closing quote, skipping escaped characters, so
+// "We're searching..." and "Say \"hi\" and wait..." both match. A backslash
+// only ever starts an escape pair, which keeps the scan linear.
+const FALLBACK_PAIR = /["']([\w-]+(?:\.[\w-]+)+)["']\s*,\s*(["'`])((?:\\.|(?!\2)[^\\\n])*\.{3})\2/g;
+
 describe("en.json ellipses", () => {
   it("ends strings with the single … character, not three dots", () => {
     const en = JSON.parse(readFileSync(enPath, "utf8"));
@@ -37,16 +44,20 @@ describe("en.json ellipses", () => {
 
   it("keeps code fallbacks for en.json keys on the … character", () => {
     const keys = new Set(flatStrings(JSON.parse(readFileSync(enPath, "utf8"))).map(([key]) => key));
-    // A `t("some.key", "Fallback...")` pair: the fallback shows whenever the
-    // catalog is not loaded, so it must match the en.json value's ellipsis.
-    const pair = /["']([\w-]+(?:\.[\w-]+)+)["']\s*,\s*["'`]([^"'`]*\.{3})["'`]/g;
     const offenders = ["packages", "apps/geolibre-desktop/src"]
       .flatMap((dir) => sourceFiles(join(repoRoot, dir)))
       .flatMap((file) =>
-        [...readFileSync(file, "utf8").matchAll(pair)]
+        [...readFileSync(file, "utf8").matchAll(FALLBACK_PAIR)]
           .filter(([, key]) => keys.has(key))
           .map(([, key]) => `${file.slice(repoRoot.length)}: ${key}`),
       );
     assert.deepEqual(offenders, [], `Use "…" instead of "...": ${offenders.join(", ")}`);
+  });
+
+  it("finds a three-dot fallback past an escaped quote", () => {
+    const source = String.raw`t("key.path", "Say \"hi\" and wait...")`;
+    const match = [...source.matchAll(FALLBACK_PAIR)][0];
+    assert.equal(match?.[1], "key.path");
+    assert.equal(match?.[3], String.raw`Say \"hi\" and wait...`);
   });
 });

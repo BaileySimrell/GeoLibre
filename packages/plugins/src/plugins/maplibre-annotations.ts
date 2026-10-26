@@ -1265,7 +1265,7 @@ function openElementDialog(
 
     descInput = document.createElement("textarea");
     descInput.rows = 3;
-    descInput.placeholder = type === "pin" ? "Optional description..." : "Type note details...";
+    descInput.placeholder = type === "pin" ? "Optional description…" : "Type note details…";
     descInput.style.cssText =
       "width: 100%; box-sizing: border-box; padding: 6px 8px; border-radius: 6px; border: 1px solid var(--geolibre-border, #d1d5db); background: var(--geolibre-bg-subtle, #f9fafb); color: inherit; font-size: 12px; resize: vertical; margin-bottom: 8px;";
     container.appendChild(descInput);

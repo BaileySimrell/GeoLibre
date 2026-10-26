@@ -171,9 +171,7 @@ test("wraps, jumps with Home/End, and leaves text fields alone (#3232)", async (
   // accessibility tree.
   const header = page.locator("header");
   // Visible only, matching the handler's own filter.
-  const triggers = header
-    .locator('[aria-haspopup="menu"], [aria-haspopup="dialog"]')
-    .filter({ visible: true });
+  const triggers = header.locator('[aria-haspopup="menu"]').filter({ visible: true });
   const first = triggers.first();
   const last = triggers.last();
 
@@ -201,6 +199,8 @@ test("wraps, jumps with Home/End, and leaves text fields alone (#3232)", async (
 
   // A quick second Right while one menu closes and the next opens leaves one
   // menu open with focus inside it, not a menu opened from the stale trigger.
+  // Whether the second press lands depends on timing, so the open menu may be
+  // the next or the one after; either way it must be the menu focus is in.
   await page.keyboard.press("Escape");
   await expect(page.getByRole("menu")).toHaveCount(0);
   await first.focus();
@@ -208,8 +208,23 @@ test("wraps, jumps with Home/End, and leaves text fields alone (#3232)", async (
   await page.keyboard.press("ArrowRight");
   await page.keyboard.press("ArrowRight");
   await expect(page.getByRole("menu")).toHaveCount(1);
+  const second = await triggers.nth(1).getAttribute("aria-label");
+  const third = await triggers.nth(2).getAttribute("aria-label");
+  // Both labels must exist, or a null poll result would match a null label.
+  expect([second, third].every(Boolean)).toBe(true);
+  // Compare labels as values, not through a RegExp built from them.
   await expect
-    .poll(() => page.evaluate(() => Boolean(document.activeElement?.closest('[role="menu"]'))))
+    .poll(async () =>
+      [second, third].includes(
+        await page.evaluate(() => {
+          const menu = document.activeElement?.closest('[role="menu"]');
+          const owner = document.getElementById(menu?.getAttribute("aria-labelledby") ?? "");
+          return owner?.getAttribute("aria-expanded") === "true"
+            ? owner.getAttribute("aria-label")
+            : null;
+        }),
+      ),
+    )
     .toBe(true);
 });
 
