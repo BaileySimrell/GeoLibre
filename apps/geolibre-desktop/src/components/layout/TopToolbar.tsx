@@ -85,7 +85,7 @@ import {
   resetRuntimeControlsForNewProject,
 } from "./toolbar/toolbar-actions";
 import { ViewMenu } from "./toolbar/ViewMenu";
-import { useMenubarKeyboard } from "./toolbar/useMenubarKeyboard";
+import { handleMenubarKeyDown } from "./toolbar/menubarKeyboard";
 
 interface TopToolbarProps {
   compact?: boolean;
@@ -294,7 +294,6 @@ export function TopToolbar({
   const appTitle = resolveAppName(isTauri() && !isMobile() ? "GeoLibre Desktop" : "GeoLibre");
   const renderToolbarLabel = (label: string) =>
     showLabels ? <span className="hidden sm:inline">{label}</span> : null;
-  const onMenubarKeyDown = useMenubarKeyboard();
   const chrome: ToolbarChrome = {
     buttonClass: toolbarButtonClass,
     buttonSize: toolbarButtonSize,
@@ -302,11 +301,11 @@ export function TopToolbar({
     renderLabel: renderToolbarLabel,
   };
 
+  // The header's key handler only routes arrow keys between the menu buttons inside.
   return (
-    // The handler only routes arrow keys between the menu buttons inside.
     // eslint-disable-next-line jsx-a11y/no-static-element-interactions
     <header
-      onKeyDown={onMenubarKeyDown}
+      onKeyDown={handleMenubarKeyDown}
       className={cn(
         // One row at every width: menus that don't fit scroll horizontally
         // instead of wrapping onto a second row (#871).

@@ -164,3 +164,66 @@ test("moves across the top menus with the arrow keys (#3232)", async ({ page }) 
   await page.keyboard.press("Escape");
   await expect(view).toBeFocused();
 });
+
+test("wraps, jumps with Home/End, and leaves text fields alone (#3232)", async ({ page }) => {
+  await waitForMap(page);
+  // Not getByRole("banner"): an open (modal) menu hides the header from the
+  // accessibility tree.
+  const header = page.locator("header");
+  const triggers = header.locator('[aria-haspopup="menu"], [aria-haspopup="dialog"]');
+  const first = triggers.first();
+  const last = triggers.last();
+
+  // Home/End jump to the ends, and Left/Right wrap around them.
+  await header.getByRole("button", { name: "Edit", exact: true }).focus();
+  await page.keyboard.press("End");
+  await expect(last).toBeFocused();
+  await page.keyboard.press("ArrowRight");
+  await expect(first).toBeFocused();
+  await page.keyboard.press("ArrowLeft");
+  await expect(last).toBeFocused();
+  await page.keyboard.press("Home");
+  await expect(first).toBeFocused();
+
+  // Arrow keys in the Processing menu's search field move the caret, not the menu.
+  await header.getByRole("button", { name: "Processing", exact: true }).click();
+  const processingMenu = page.getByRole("menu", { name: "Processing", exact: true });
+  const search = processingMenu.getByRole("combobox", { name: "Search processing tools" });
+  await search.fill("buffer");
+  await page.keyboard.press("ArrowLeft");
+  await page.keyboard.press("ArrowRight");
+  await expect(search).toBeFocused();
+  await expect(page.getByRole("menu")).toHaveCount(1);
+  await expect(processingMenu).toBeVisible();
+
+  // A quick second Right while one menu closes and the next opens leaves one
+  // menu open with focus inside it, not a menu opened from the stale trigger.
+  await page.keyboard.press("Escape");
+  await expect(page.getByRole("menu")).toHaveCount(0);
+  await first.focus();
+  await page.keyboard.press("Enter");
+  await page.keyboard.press("ArrowRight");
+  await page.keyboard.press("ArrowRight");
+  await expect(page.getByRole("menu")).toHaveCount(1);
+  await expect
+    .poll(() => page.evaluate(() => Boolean(document.activeElement?.closest('[role="menu"]'))))
+    .toBe(true);
+});
+
+test("mirrors the menu-bar arrow keys in a right-to-left locale (#3232)", async ({ page }) => {
+  await waitForMap(page, "/?locale=ar");
+  const triggers = page.locator("header").locator('[aria-haspopup="menu"]');
+
+  // In RTL the next menu sits to the left, so ArrowLeft moves forward.
+  await triggers.nth(0).focus();
+  await page.keyboard.press("ArrowLeft");
+  await expect(triggers.nth(1)).toBeFocused();
+  await page.keyboard.press("ArrowRight");
+  await expect(triggers.nth(0)).toBeFocused();
+
+  await page.keyboard.press("Enter");
+  await expect(page.getByRole("menu")).toHaveCount(1);
+  await page.keyboard.press("ArrowLeft");
+  await expect(triggers.nth(1)).toHaveAttribute("aria-expanded", "true");
+  await expect(triggers.nth(0)).toHaveAttribute("aria-expanded", "false");
+});
