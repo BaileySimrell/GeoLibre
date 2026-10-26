@@ -63,7 +63,8 @@ export function LayerPanelHeader({
   const { t } = useTranslation();
   const setIdentifyLayer = useAppStore((s) => s.setIdentifyLayer);
   const [compactLayerList, setCompactLayerList] = useCompactLayerList();
-  // Wraps instead of overflowing: the panel can be resized down to 180px.
+  // The header row wraps (flex-wrap) instead of overflowing, since the panel
+  // can be resized down to MIN_SIDE_PANEL_WIDTH (usePanelResize.ts).
   return (
     <div className="flex flex-wrap items-center justify-between gap-x-2 border-b px-3 py-1.5">
       <span className="text-sm font-semibold">{t("sharedRail.layers")}</span>
