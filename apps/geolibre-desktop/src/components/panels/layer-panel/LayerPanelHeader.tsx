@@ -63,8 +63,8 @@ export function LayerPanelHeader({
   const { t } = useTranslation();
   const setIdentifyLayer = useAppStore((s) => s.setIdentifyLayer);
   const [compactLayerList, setCompactLayerList] = useCompactLayerList();
+  // Wraps instead of overflowing: the panel can be resized down to 180px.
   return (
-    // Wraps instead of overflowing: the panel can be resized down to 180px.
     <div className="flex flex-wrap items-center justify-between gap-x-2 border-b px-3 py-1.5">
       <span className="text-sm font-semibold">{t("sharedRail.layers")}</span>
       <div className="ms-auto flex flex-wrap items-center justify-end">
