@@ -124,3 +124,30 @@ test("adds, restyles and exports a GeoJSON layer with the keyboard alone", async
   expect(exported.type).toBe("FeatureCollection");
   expect(exported.features).toHaveLength(FEATURES.features.length);
 });
+
+test("moves across the top menus with the arrow keys (#3232)", async ({ page }) => {
+  await waitForMap(page);
+  const banner = page.getByRole("banner");
+  const project = banner.getByRole("button", { name: "Project", exact: true });
+  const edit = banner.getByRole("button", { name: "Edit", exact: true });
+  const view = banner.getByRole("button", { name: "View", exact: true });
+
+  // Closed: Right/Left move focus between the top-level menus.
+  await project.focus();
+  await page.keyboard.press("ArrowRight");
+  await expect(edit).toBeFocused();
+  await page.keyboard.press("ArrowLeft");
+  await expect(project).toBeFocused();
+
+  // Open: Right closes the current menu and opens the next one.
+  await page.keyboard.press("Enter");
+  await expect(page.getByRole("menu", { name: "Project" })).toBeVisible();
+  await page.keyboard.press("ArrowRight");
+  await expect(page.getByRole("menu", { name: "Edit" })).toBeVisible();
+  await expect(page.getByRole("menu", { name: "Project" })).toHaveCount(0);
+  await page.keyboard.press("ArrowRight");
+  await expect(page.getByRole("menu", { name: "View" })).toBeVisible();
+
+  await page.keyboard.press("Escape");
+  await expect(view).toBeFocused();
+});
