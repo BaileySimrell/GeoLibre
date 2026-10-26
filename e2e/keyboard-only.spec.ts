@@ -170,7 +170,10 @@ test("wraps, jumps with Home/End, and leaves text fields alone (#3232)", async (
   // Not getByRole("banner"): an open (modal) menu hides the header from the
   // accessibility tree.
   const header = page.locator("header");
-  const triggers = header.locator('[aria-haspopup="menu"], [aria-haspopup="dialog"]');
+  // Visible only, matching the handler's own filter.
+  const triggers = header
+    .locator('[aria-haspopup="menu"], [aria-haspopup="dialog"]')
+    .filter({ visible: true });
   const first = triggers.first();
   const last = triggers.last();
 
@@ -212,7 +215,10 @@ test("wraps, jumps with Home/End, and leaves text fields alone (#3232)", async (
 
 test("mirrors the menu-bar arrow keys in a right-to-left locale (#3232)", async ({ page }) => {
   await waitForMap(page, "/?locale=ar");
-  const triggers = page.locator("header").locator('[aria-haspopup="menu"]');
+  const triggers = page
+    .locator("header")
+    .locator('[aria-haspopup="menu"]')
+    .filter({ visible: true });
 
   // In RTL the next menu sits to the left, so ArrowLeft moves forward.
   await triggers.nth(0).focus();

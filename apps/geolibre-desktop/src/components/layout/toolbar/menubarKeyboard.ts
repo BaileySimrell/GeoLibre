@@ -88,7 +88,8 @@ export function handleMenubarKeyDown(event: ReactKeyboardEvent<HTMLElement>) {
     const fallback = window.setTimeout(open, 100);
     // Radix listens for Escape on `document` in the capture phase, so a
     // non-bubbling event on the menu reaches it without reaching the app's
-    // window-level Escape handlers (region select, line of sight, …).
+    // bubble-phase window Escape handlers (region select, line of sight, …).
+    // Capture-phase listeners such as useFileDrop's still see it.
     menu.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape" }));
     return;
   }
