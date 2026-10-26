@@ -27,8 +27,9 @@ function sourceFiles(dir: string): string[] {
 // A `t("some.key", "Fallback...")` pair: the fallback shows whenever the
 // catalog is not loaded, so it must match the en.json value's ellipsis. The
 // fallback runs to its own closing quote, skipping escaped characters, so
-// "We're searching..." and "Say \"hi\" and wait..." both match.
-const FALLBACK_PAIR = /["']([\w-]+(?:\.[\w-]+)+)["']\s*,\s*(["'`])((?:\\.|(?!\2).)*\.{3})\2/g;
+// "We're searching..." and "Say \"hi\" and wait..." both match. A backslash
+// only ever starts an escape pair, which keeps the scan linear.
+const FALLBACK_PAIR = /["']([\w-]+(?:\.[\w-]+)+)["']\s*,\s*(["'`])((?:\\.|(?!\2)[^\\\n])*\.{3})\2/g;
 
 describe("en.json ellipses", () => {
   it("ends strings with the single … character, not three dots", () => {

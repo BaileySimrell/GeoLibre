@@ -210,6 +210,8 @@ test("wraps, jumps with Home/End, and leaves text fields alone (#3232)", async (
   await expect(page.getByRole("menu")).toHaveCount(1);
   const second = await triggers.nth(1).getAttribute("aria-label");
   const third = await triggers.nth(2).getAttribute("aria-label");
+  // Both labels must exist, or a null poll result would match a null label.
+  expect([second, third].every(Boolean)).toBe(true);
   // Compare labels as values, not through a RegExp built from them.
   await expect
     .poll(async () =>
