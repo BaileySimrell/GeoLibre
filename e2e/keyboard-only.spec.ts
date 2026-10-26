@@ -210,17 +210,20 @@ test("wraps, jumps with Home/End, and leaves text fields alone (#3232)", async (
   await expect(page.getByRole("menu")).toHaveCount(1);
   const second = await triggers.nth(1).getAttribute("aria-label");
   const third = await triggers.nth(2).getAttribute("aria-label");
+  // Compare labels as values, not through a RegExp built from them.
   await expect
-    .poll(() =>
-      page.evaluate(() => {
-        const menu = document.activeElement?.closest('[role="menu"]');
-        const owner = document.getElementById(menu?.getAttribute("aria-labelledby") ?? "");
-        return owner?.getAttribute("aria-expanded") === "true"
-          ? owner.getAttribute("aria-label")
-          : null;
-      }),
+    .poll(async () =>
+      [second, third].includes(
+        await page.evaluate(() => {
+          const menu = document.activeElement?.closest('[role="menu"]');
+          const owner = document.getElementById(menu?.getAttribute("aria-labelledby") ?? "");
+          return owner?.getAttribute("aria-expanded") === "true"
+            ? owner.getAttribute("aria-label")
+            : null;
+        }),
+      ),
     )
-    .toMatch(new RegExp(`^(${second}|${third})$`));
+    .toBe(true);
 });
 
 test("mirrors the menu-bar arrow keys in a right-to-left locale (#3232)", async ({ page }) => {
