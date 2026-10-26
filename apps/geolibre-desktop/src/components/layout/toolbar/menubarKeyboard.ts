@@ -1,8 +1,8 @@
 import type { KeyboardEvent as ReactKeyboardEvent } from "react";
 
-// The top-level toolbar entries: every menu trigger plus the Settings dialog
-// button. The project-name field and theme toggle open nothing and stay out.
-const TRIGGER_SELECTOR = ':scope [aria-haspopup="menu"], :scope [aria-haspopup="dialog"]';
+// The top-level toolbar entries: every menu trigger, Settings included (it is a
+// dropdown too). The project-name field and theme toggle open nothing and stay out.
+const TRIGGER_SELECTOR = '[aria-haspopup="menu"]';
 
 const NAV_KEYS = new Set(["ArrowLeft", "ArrowRight", "Home", "End"]);
 
@@ -23,7 +23,6 @@ function toolbarTriggers(toolbar: HTMLElement): HTMLElement[] {
 
 function openMenuFrom(trigger: HTMLElement) {
   trigger.focus();
-  if (trigger.getAttribute("aria-haspopup") !== "menu") return;
   // Radix opens a dropdown from its trigger on ArrowDown and focuses the first item.
   trigger.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true }));
 }

@@ -151,7 +151,7 @@ export function useFileDrop({
           // Matches the browser drop handler: a warning about a previous file
           // must not linger over an unrelated drop.
           setCrsWarning(null);
-          setDropMessage("Importing data...");
+          setDropMessage("Importing data…");
 
           try {
             const paths = event.payload.paths;
@@ -381,7 +381,7 @@ export function useFileDrop({
       // so it is cleared here instead: a warning about a previous file must not
       // linger over an unrelated drop.
       setCrsWarning(null);
-      setDropMessage("Importing data...");
+      setDropMessage("Importing data…");
 
       try {
         const allFiles = Array.from(event.dataTransfer.files);

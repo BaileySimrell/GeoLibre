@@ -39,7 +39,8 @@ describe("en.json ellipses", () => {
     const keys = new Set(flatStrings(JSON.parse(readFileSync(enPath, "utf8"))).map(([key]) => key));
     // A `t("some.key", "Fallback...")` pair: the fallback shows whenever the
     // catalog is not loaded, so it must match the en.json value's ellipsis.
-    const pair = /["']([\w-]+(?:\.[\w-]+)+)["']\s*,\s*["'`]([^"'`]*\.{3})["'`]/g;
+    // The fallback runs to its own closing quote, so "We're searching..." matches.
+    const pair = /["']([\w-]+(?:\.[\w-]+)+)["']\s*,\s*(["'`])((?:(?!\2).)*\.{3})\2/g;
     const offenders = ["packages", "apps/geolibre-desktop/src"]
       .flatMap((dir) => sourceFiles(join(repoRoot, dir)))
       .flatMap((file) =>
