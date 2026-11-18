@@ -56,6 +56,9 @@ import {
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
   Input,
   Label,
@@ -190,12 +193,14 @@ const MAX_FEATURE_ID_COLUMN_WIDTH = 180;
 const MIN_ATTRIBUTE_COLUMN_WIDTH = 72;
 const MAX_ATTRIBUTE_COLUMN_WIDTH = 520;
 // Estimated row height used to size the virtualizer before real rows are
-// measured. View-mode rows are ~37px; edit-mode rows (with an Input) are taller
-// and are corrected by measureElement once rendered.
-const ESTIMATED_ROW_HEIGHT = 37;
-/** Sticky header plus horizontal scrollbar: the table's non-row height, in px. */
-const ATTRIBUTE_TABLE_CHROME_HEIGHT = 58;
-// Tall enough to keep a few rows visible when the toolbar wraps on laptop widths.
+// measured. View-mode rows are ~27px (3px block padding around a 20px line);
+// edit-mode rows (with an Input) are taller and are corrected by
+// measureElement once rendered.
+const ESTIMATED_ROW_HEIGHT = 27;
+/** Sticky header (30px) plus horizontal scrollbar (14px): the table's non-row height, in px. */
+const ATTRIBUTE_TABLE_CHROME_HEIGHT = 44;
+// With the one-line toolbar and compact rows, this shows four to five rows at
+// laptop widths.
 const DEFAULT_TABLE_HEIGHT = 240;
 const MIN_TABLE_HEIGHT = 96;
 const MAX_TABLE_HEIGHT = 520;
@@ -1084,8 +1089,8 @@ export function AttributeTable({ mapControllerRef, refresh }: AttributeTableProp
     // mounted.
     overscan: 8,
     // Row offsets are measured from the top of the scroll area, but the sticky
-    // header (2.75rem) sits above the first row and the horizontal scrollbar
-    // (0.875rem) overlays the bottom; the vertical scrollbar's 3.625rem inset
+    // header (1.875rem) sits above the first row and the horizontal scrollbar
+    // (0.875rem) overlays the bottom; the vertical scrollbar's 2.75rem inset
     // below is the same sum. Without this, scrolling the selected row into view
     // from below parked it under the horizontal scrollbar.
     scrollPaddingEnd: ATTRIBUTE_TABLE_CHROME_HEIGHT,
@@ -1757,7 +1762,7 @@ export function AttributeTable({ mapControllerRef, refresh }: AttributeTableProp
   };
 
   const sortableHeader = (key: SortKey, label: string, numeric = false) => (
-    <div className="relative flex h-full min-h-10 items-center">
+    <div className="relative flex h-full min-h-7 items-center">
       <button
         type="button"
         className={`flex h-full min-w-0 flex-1 items-center gap-1 pe-3 font-medium ${
@@ -1781,7 +1786,7 @@ export function AttributeTable({ mapControllerRef, refresh }: AttributeTableProp
   const attributeColumnHeader = (col: string, index: number) => {
     if (editingColumn === col) {
       return (
-        <div className="relative flex h-full min-h-10 items-center">
+        <div className="relative flex h-full min-h-7 items-center">
           <Input
             autoFocus
             className="h-7 min-w-0 flex-1 px-2 text-xs"
@@ -1819,7 +1824,7 @@ export function AttributeTable({ mapControllerRef, refresh }: AttributeTableProp
     if (!canManageColumns || isEditing) return sortableHeader(col, col, numeric);
 
     return (
-      <div className="relative flex h-full min-h-10 items-center">
+      <div className="relative flex h-full min-h-7 items-center">
         <button
           type="button"
           className={`flex h-full min-w-0 flex-1 items-center gap-1 pe-1 font-medium ${
@@ -1941,11 +1946,11 @@ export function AttributeTable({ mapControllerRef, refresh }: AttributeTableProp
         <TableProperties className="h-4 w-4 text-muted-foreground" />
         <span className="text-sm font-semibold">{t("attributeTable.title")}</span>
         {layer ? (
-          <span className="min-w-0 max-w-full truncate text-xs text-muted-foreground md:max-w-56">
+          <span className="min-w-0 max-w-56 flex-[1_1_6rem] truncate text-xs text-muted-foreground">
             {t("attributeTable.selectedLayerName", { name: layer.name })}
           </span>
         ) : (
-          <span className="min-w-0 max-w-full truncate text-xs text-muted-foreground md:max-w-56">
+          <span className="min-w-0 max-w-56 flex-[1_1_6rem] truncate text-xs text-muted-foreground">
             {t("attributeTable.noLayerSelected")}
           </span>
         )}
@@ -1988,10 +1993,15 @@ export function AttributeTable({ mapControllerRef, refresh }: AttributeTableProp
             {contingencyNotice}
           </span>
         ) : null}
+        {/* One line at laptop widths: the table's own actions (edit, save,
+            the feature view, selection and search) stay in the bar, and the
+            field tools, analysis dialogs, refresh, export and the zoom toggle
+            sit in the overflow menu, so the toolbar no longer wraps over the
+            rows. Narrower panels still wrap rather than clip Close. */}
         <Button
           variant={isEditing ? "secondary" : "outline"}
           size="sm"
-          className="ms-auto h-7 px-2"
+          className="h-7 px-2"
           title={
             !layerCaps.update
               ? t("attributeTable.editTitleCapabilityDisabled")
@@ -2040,215 +2050,6 @@ export function AttributeTable({ mapControllerRef, refresh }: AttributeTableProp
           <Save className="h-3.5 w-3.5" />
           <span className="hidden @[112rem]:inline">{t("common.save")}</span>
         </Button>
-        {canManageColumns && !isEditing ? (
-          <Button
-            variant="outline"
-            size="sm"
-            className="h-7 px-2"
-            title={t("attributeTable.addFieldTitle")}
-            aria-label={t("attributeTable.addField")}
-            onClick={openAddColumn}
-          >
-            <Plus className="h-3.5 w-3.5" />
-            <span className="hidden @[112rem]:inline">{t("attributeTable.addField")}</span>
-          </Button>
-        ) : null}
-        {canManageColumns && !isEditing ? (
-          <Button
-            variant="outline"
-            size="sm"
-            className="h-7 px-2"
-            title={t("attributeTable.fieldCalculatorTitle")}
-            aria-label={t("attributeTable.fieldCalculatorTitle")}
-            onClick={openCalculator}
-          >
-            <Calculator className="h-3.5 w-3.5" />
-            <span className="hidden @[112rem]:inline">{t("attributeTable.buttons.calculate")}</span>
-          </Button>
-        ) : null}
-        {canManageColumns && !isEditing ? (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="outline"
-                size="sm"
-                className="h-7 px-2"
-                title={t("attributeTable.manageFieldsTitle")}
-                aria-label={t("attributeTable.manageFields")}
-              >
-                <Columns3 className="h-3.5 w-3.5" />
-                <span className="hidden @[112rem]:inline">
-                  {t("attributeTable.buttons.fields")}
-                </span>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="max-h-72 overflow-y-auto">
-              <DropdownMenuLabel>{t("attributeTable.showFields")}</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              {discoveredColumns.length === 0 ? (
-                <DropdownMenuItem disabled>{t("attributeTable.noFields")}</DropdownMenuItem>
-              ) : (
-                discoveredColumns.map((col) => (
-                  <DropdownMenuCheckboxItem
-                    key={col}
-                    checked={!hiddenColSet.has(col)}
-                    // Keep the menu open so several fields can be toggled at once.
-                    onSelect={(event: Event) => event.preventDefault()}
-                    onCheckedChange={() => handleToggleHidden(col)}
-                  >
-                    <span className="truncate">{col}</span>
-                  </DropdownMenuCheckboxItem>
-                ))
-              )}
-              {hiddenCols.length > 0 ? (
-                <>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onSelect={handleShowAllColumns}>
-                    {t("attributeTable.showAllFields")}
-                  </DropdownMenuItem>
-                </>
-              ) : null}
-            </DropdownMenuContent>
-          </DropdownMenu>
-        ) : null}
-        {!isEditing ? (
-          <Button
-            variant="outline"
-            size="sm"
-            className="h-7 px-2"
-            title={
-              hasAttributeSource
-                ? t("attributeTable.columnExplorerTitle")
-                : t("attributeTable.columnExplorerTitleDisabled")
-            }
-            aria-label={t("attributeTable.columnExplorerTitle")}
-            disabled={!hasAttributeSource}
-            onClick={() => setExplorerOpen(true)}
-          >
-            <Telescope className="h-3.5 w-3.5" />
-            <span className="hidden @[112rem]:inline">{t("attributeTable.buttons.explore")}</span>
-          </Button>
-        ) : null}
-        {!isEditing ? (
-          <Button
-            variant="outline"
-            size="sm"
-            className="h-7 px-2"
-            title={
-              hasAttributeSource
-                ? t("attributeTable.statisticsTitle")
-                : t("attributeTable.statisticsTitleDisabled")
-            }
-            aria-label={t("attributeTable.statistics")}
-            disabled={!hasAttributeSource}
-            onClick={() => setStatsOpen(true)}
-          >
-            <Sigma className="h-3.5 w-3.5" />
-            <span className="hidden @[112rem]:inline">
-              {t("attributeTable.buttons.statistics")}
-            </span>
-          </Button>
-        ) : null}
-        {!isEditing ? (
-          <Button
-            variant="outline"
-            size="sm"
-            className="h-7 px-2"
-            title={
-              hasAttributeSource
-                ? t("attributeTable.chartsTitle")
-                : t("attributeTable.chartsTitleDisabled")
-            }
-            aria-label={t("attributeTable.charts")}
-            disabled={!hasAttributeSource}
-            onClick={() => setChartOpen(true)}
-          >
-            <ChartColumn className="h-3.5 w-3.5" />
-            <span className="hidden @[112rem]:inline">{t("attributeTable.charts")}</span>
-          </Button>
-        ) : null}
-        {!isEditing ? (
-          <Button
-            variant="outline"
-            size="sm"
-            className="h-7 px-2"
-            title={t("attributeTable.dashboardTitle")}
-            aria-label={t("attributeTable.dashboard")}
-            onClick={() => setDashboardOpen(true)}
-          >
-            <LayoutDashboard className="h-3.5 w-3.5" />
-            <span className="hidden @[112rem]:inline">{t("attributeTable.dashboard")}</span>
-          </Button>
-        ) : null}
-        {!isEditing && canRefreshLayer && layer ? (
-          <Button
-            variant="outline"
-            size="sm"
-            className="h-7 px-2"
-            title={
-              refreshBlockedByEdits
-                ? t("attributeTable.refreshTitlePendingEdits")
-                : isLocalFileRefresh
-                  ? t("attributeTable.refreshTitleLocalFile")
-                  : t("attributeTable.refreshTitle")
-            }
-            aria-label={t("attributeTable.refresh")}
-            aria-busy={isRefreshingLayer}
-            disabled={isRefreshingLayer || refreshBlockedByEdits}
-            onClick={() => void refreshLayerRows(layer)}
-          >
-            <RefreshCw className={`h-3.5 w-3.5 ${isRefreshingLayer ? "animate-spin" : ""}`} />
-            <span className="hidden @[112rem]:inline">{t("attributeTable.buttons.refresh")}</span>
-          </Button>
-        ) : null}
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              variant="outline"
-              size="sm"
-              className="h-7 px-2"
-              title={
-                !layerCaps.export
-                  ? t("attributeTable.exportTitleCapabilityDisabled")
-                  : layer?.geojson
-                    ? t("attributeTable.exportSelectedLayer")
-                    : t("attributeTable.exportTitleDisabled")
-              }
-              aria-label={t("attributeTable.exportSelectedLayer")}
-              disabled={!layer?.geojson || !layerCaps.export}
-            >
-              <Download className="h-3.5 w-3.5" />
-              <span className="hidden @[112rem]:inline">{t("attributeTable.buttons.export")}</span>
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem onSelect={() => void exportLayer("geojson")}>
-              GeoJSON
-            </DropdownMenuItem>
-            <DropdownMenuItem onSelect={() => void exportLayer("geoparquet")}>
-              GeoParquet
-            </DropdownMenuItem>
-            <DropdownMenuItem onSelect={() => void exportLayer("geopackage")}>
-              GeoPackage
-            </DropdownMenuItem>
-            <DropdownMenuItem onSelect={() => void exportLayer("kml")}>KML</DropdownMenuItem>
-            <DropdownMenuItem onSelect={() => void exportLayer("kmz")}>KMZ</DropdownMenuItem>
-            <DropdownMenuItem onSelect={() => void exportLayer("shapefile")}>
-              Shapefile (zipped)
-            </DropdownMenuItem>
-            <DropdownMenuItem onSelect={() => void exportLayer("csv")}>CSV</DropdownMenuItem>
-            {layer && layerSupportsPolylineExport(layer) && (
-              <>
-                <DropdownMenuItem onSelect={() => void exportLayer("polyline", 5)}>
-                  {t("layers.exportPolyline", { precision: 5 })}
-                </DropdownMenuItem>
-                <DropdownMenuItem onSelect={() => void exportLayer("polyline", 6)}>
-                  {t("layers.exportPolyline", { precision: 6 })}
-                </DropdownMenuItem>
-              </>
-            )}
-          </DropdownMenuContent>
-        </DropdownMenu>
         {isEditing ? (
           <Button
             variant="ghost"
@@ -2261,21 +2062,6 @@ export function AttributeTable({ mapControllerRef, refresh }: AttributeTableProp
             <RotateCcw className="h-4 w-4" />
           </Button>
         ) : null}
-        <Input
-          className="h-7 min-w-36 flex-1 text-xs md:max-w-xs"
-          placeholder={t("attributeTable.searchPlaceholder")}
-          aria-label={t("attributeTable.searchAria")}
-          value={attributeFilter}
-          onChange={(e) => setAttributeFilter(e.target.value)}
-        />
-        <label className="flex items-center gap-1.5 whitespace-nowrap text-xs text-muted-foreground">
-          <input
-            type="checkbox"
-            checked={zoomToSelectedFeature}
-            onChange={(event) => setZoomToSelectedFeature(event.target.checked)}
-          />
-          {t("attributeTable.zoomToSelection")}
-        </label>
         {/* A native <select> (not the @geolibre/ui Select, which hardcodes h-9
             and w-full) so it matches the h-7 toolbar and self-sizes to its
             content instead of clipping the longest label. */}
@@ -2339,6 +2125,203 @@ export function AttributeTable({ mapControllerRef, refresh }: AttributeTableProp
             <Network className="h-3.5 w-3.5" />
           </Button>
         ) : null}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="outline"
+              size="icon"
+              className="h-7 w-7"
+              title={t("attributeTable.moreActions")}
+              aria-label={t("attributeTable.moreActions")}
+            >
+              <MoreHorizontal className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="min-w-52">
+            {canManageColumns && !isEditing ? (
+              <>
+                <DropdownMenuItem
+                  className="gap-2"
+                  title={t("attributeTable.addFieldTitle")}
+                  onSelect={openAddColumn}
+                >
+                  <Plus className="h-4 w-4" />
+                  {t("attributeTable.addField")}
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  className="gap-2"
+                  title={t("attributeTable.fieldCalculatorTitle")}
+                  onSelect={openCalculator}
+                >
+                  <Calculator className="h-4 w-4" />
+                  {t("attributeTable.fieldCalculator")}
+                </DropdownMenuItem>
+                <DropdownMenuSub>
+                  <DropdownMenuSubTrigger title={t("attributeTable.manageFieldsTitle")}>
+                    <Columns3 className="h-4 w-4" />
+                    {t("attributeTable.manageFields")}
+                  </DropdownMenuSubTrigger>
+                  <DropdownMenuSubContent className="max-h-72 overflow-y-auto">
+                    <DropdownMenuLabel>{t("attributeTable.showFields")}</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    {discoveredColumns.length === 0 ? (
+                      <DropdownMenuItem disabled>{t("attributeTable.noFields")}</DropdownMenuItem>
+                    ) : (
+                      discoveredColumns.map((col) => (
+                        <DropdownMenuCheckboxItem
+                          key={col}
+                          checked={!hiddenColSet.has(col)}
+                          // Keep the menu open so several fields can be toggled at once.
+                          onSelect={(event: Event) => event.preventDefault()}
+                          onCheckedChange={() => handleToggleHidden(col)}
+                        >
+                          <span className="truncate">{col}</span>
+                        </DropdownMenuCheckboxItem>
+                      ))
+                    )}
+                    {hiddenCols.length > 0 ? (
+                      <>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem onSelect={handleShowAllColumns}>
+                          {t("attributeTable.showAllFields")}
+                        </DropdownMenuItem>
+                      </>
+                    ) : null}
+                  </DropdownMenuSubContent>
+                </DropdownMenuSub>
+                <DropdownMenuSeparator />
+              </>
+            ) : null}
+            {!isEditing ? (
+              <>
+                <DropdownMenuItem
+                  className="gap-2"
+                  title={
+                    hasAttributeSource
+                      ? t("attributeTable.columnExplorerTitle")
+                      : t("attributeTable.columnExplorerTitleDisabled")
+                  }
+                  disabled={!hasAttributeSource}
+                  onSelect={() => setExplorerOpen(true)}
+                >
+                  <Telescope className="h-4 w-4" />
+                  {t("attributeTable.columnExplorer")}
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  className="gap-2"
+                  title={
+                    hasAttributeSource
+                      ? t("attributeTable.statisticsTitle")
+                      : t("attributeTable.statisticsTitleDisabled")
+                  }
+                  disabled={!hasAttributeSource}
+                  onSelect={() => setStatsOpen(true)}
+                >
+                  <Sigma className="h-4 w-4" />
+                  {t("attributeTable.statistics")}
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  className="gap-2"
+                  title={
+                    hasAttributeSource
+                      ? t("attributeTable.chartsTitle")
+                      : t("attributeTable.chartsTitleDisabled")
+                  }
+                  disabled={!hasAttributeSource}
+                  onSelect={() => setChartOpen(true)}
+                >
+                  <ChartColumn className="h-4 w-4" />
+                  {t("attributeTable.charts")}
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  className="gap-2"
+                  title={t("attributeTable.dashboardTitle")}
+                  onSelect={() => setDashboardOpen(true)}
+                >
+                  <LayoutDashboard className="h-4 w-4" />
+                  {t("attributeTable.dashboard")}
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+              </>
+            ) : null}
+            {!isEditing && canRefreshLayer && layer ? (
+              <DropdownMenuItem
+                className="gap-2"
+                title={
+                  refreshBlockedByEdits
+                    ? t("attributeTable.refreshTitlePendingEdits")
+                    : isLocalFileRefresh
+                      ? t("attributeTable.refreshTitleLocalFile")
+                      : t("attributeTable.refreshTitle")
+                }
+                aria-busy={isRefreshingLayer}
+                disabled={isRefreshingLayer || refreshBlockedByEdits}
+                onSelect={() => void refreshLayerRows(layer)}
+              >
+                <RefreshCw className={`h-4 w-4 ${isRefreshingLayer ? "animate-spin" : ""}`} />
+                {t("attributeTable.refresh")}
+              </DropdownMenuItem>
+            ) : null}
+            <DropdownMenuSub>
+              <DropdownMenuSubTrigger
+                title={
+                  !layerCaps.export
+                    ? t("attributeTable.exportTitleCapabilityDisabled")
+                    : layer?.geojson
+                      ? t("attributeTable.exportSelectedLayer")
+                      : t("attributeTable.exportTitleDisabled")
+                }
+                disabled={!layer?.geojson || !layerCaps.export}
+              >
+                <Download className="h-4 w-4" />
+                {t("attributeTable.buttons.export")}
+              </DropdownMenuSubTrigger>
+              <DropdownMenuSubContent>
+                <DropdownMenuItem onSelect={() => void exportLayer("geojson")}>
+                  GeoJSON
+                </DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => void exportLayer("geoparquet")}>
+                  GeoParquet
+                </DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => void exportLayer("geopackage")}>
+                  GeoPackage
+                </DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => void exportLayer("kml")}>KML</DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => void exportLayer("kmz")}>KMZ</DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => void exportLayer("shapefile")}>
+                  Shapefile (zipped)
+                </DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => void exportLayer("csv")}>CSV</DropdownMenuItem>
+                {layer && layerSupportsPolylineExport(layer) && (
+                  <>
+                    <DropdownMenuItem onSelect={() => void exportLayer("polyline", 5)}>
+                      {t("layers.exportPolyline", { precision: 5 })}
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onSelect={() => void exportLayer("polyline", 6)}>
+                      {t("layers.exportPolyline", { precision: 6 })}
+                    </DropdownMenuItem>
+                  </>
+                )}
+              </DropdownMenuSubContent>
+            </DropdownMenuSub>
+            <DropdownMenuSeparator />
+            <DropdownMenuCheckboxItem
+              checked={zoomToSelectedFeature}
+              onCheckedChange={(checked) => setZoomToSelectedFeature(checked === true)}
+            >
+              {t("attributeTable.zoomToSelection")}
+            </DropdownMenuCheckboxItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+        {/* Fixed width, pushed to the end beside Collapse and Close. It may
+            shrink a little before the bar wraps on narrow panels. */}
+        <Input
+          className="ms-auto h-7 w-[200px] min-w-28 shrink text-xs"
+          placeholder={t("attributeTable.searchPlaceholder")}
+          aria-label={t("attributeTable.searchAria")}
+          value={attributeFilter}
+          onChange={(e) => setAttributeFilter(e.target.value)}
+        />
         <Button
           variant="ghost"
           size="icon"
@@ -2365,15 +2348,15 @@ export function AttributeTable({ mapControllerRef, refresh }: AttributeTableProp
         </Button>
       </div>
       {/*
-        Vertical scrollbar height reserves 3.625rem: 2.75rem for the sticky
-        header (top-11) plus 0.875rem for the horizontal scrollbar (h-3.5),
-        so the two scrollbars do not overlap.
+        Vertical scrollbar height reserves 2.75rem: 1.875rem for the sticky
+        header row (30px) plus 0.875rem for the
+        horizontal scrollbar (h-3.5), so the two scrollbars do not overlap.
       */}
       {!collapsed ? (
         <ScrollArea
           type="always"
           viewportRef={scrollViewportRef}
-          className="flex-1 [&_[data-orientation=vertical]]:!top-11 [&_[data-orientation=vertical]]:!h-[calc(100%-3.625rem)]"
+          className="flex-1 [&_[data-orientation=vertical]]:!top-[1.875rem] [&_[data-orientation=vertical]]:!h-[calc(100%-2.75rem)]"
         >
           {!hasAttributeSource ? (
             <p className="p-4 text-xs text-muted-foreground">
@@ -2397,9 +2380,11 @@ export function AttributeTable({ mapControllerRef, refresh }: AttributeTableProp
               </colgroup>
               <TableHeader className="sticky top-0 z-10 bg-card shadow-xs">
                 <TableRow>
-                  <TableHead className="bg-card">{sortableHeader("__featureId", "#")}</TableHead>
+                  <TableHead className="h-[30px] bg-card">
+                    {sortableHeader("__featureId", "#")}
+                  </TableHead>
                   {columns.map((col, index) => (
-                    <TableHead key={col} className="bg-card">
+                    <TableHead key={col} className="h-[30px] bg-card">
                       {attributeColumnHeader(col, index)}
                     </TableHead>
                   ))}
@@ -2441,7 +2426,7 @@ export function AttributeTable({ mapControllerRef, refresh }: AttributeTableProp
                         handleRowClick(featureId, event);
                       }}
                     >
-                      <TableCell>
+                      <TableCell className="py-[3px]">
                         <span className="block max-w-full truncate" title={featureId}>
                           {featureId}
                         </span>
@@ -2504,7 +2489,7 @@ export function AttributeTable({ mapControllerRef, refresh }: AttributeTableProp
                           <TableCell
                             key={col}
                             data-state={changed ? "edited" : undefined}
-                            className="data-[state=edited]:bg-primary/10 data-[state=edited]:shadow-[inset_3px_0_0_hsl(var(--primary))]"
+                            className="py-[3px] data-[state=edited]:bg-primary/10 data-[state=edited]:shadow-[inset_3px_0_0_hsl(var(--primary))]"
                             title={columnHint}
                           >
                             {isEditableCell ? (
